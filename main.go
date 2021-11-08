@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 )
@@ -19,7 +20,7 @@ type Credentials struct {
 }
 
 func main() {
-	executeBot()
+	lambda.Start(executeBot)
 }
 
 func executeBot() {
