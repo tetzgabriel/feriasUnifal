@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
@@ -22,7 +23,7 @@ func main() {
 }
 
 func executeBot() {
-	log.Printf("Starting CapitaisBot...")
+	log.Printf("Starting FeriasUnifalBot...")
 
 	log.Printf("Getting Credentials from environment...")
 	creds := Credentials{
@@ -39,15 +40,9 @@ func executeBot() {
 		log.Println(err)
 	}
 
-	tweet(client)
-}
+	phraseToTweet := getRandomPhrase()
 
-func getRandomInt() int {
-	rand.Seed(time.Now().UnixNano())
-	min := 0
-	max := 9
-
-	return rand.Intn(max-min+1) + min
+	tweet(client, phraseToTweet)
 }
 
 func getRandomPhrase() string {
@@ -67,6 +62,14 @@ func getRandomPhrase() string {
 	num := getRandomInt()
 
 	return phrases[num]
+}
+
+func getRandomInt() int {
+	rand.Seed(time.Now().UnixNano())
+	min := 0
+	max := 9
+
+	return rand.Intn(max-min+1) + min
 }
 
 func getClient(creds *Credentials) (*twitter.Client, error) {
@@ -90,8 +93,34 @@ func getClient(creds *Credentials) (*twitter.Client, error) {
 	return client, nil
 }
 
-func tweet(client *twitter.Client) {
-	tweet, _, err := client.Statuses.Update("Country:", nil)
+func Date(year, month, day int) time.Time {
+	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+}
+
+func getDaysUntilVacation() int {
+	vacationDay := Date(2022, 4, 16)
+	today := time.Now()
+
+	days := vacationDay.Sub(today).Hours() / 24
+
+	log.Printf("Days left: %d\n", int(days))
+	return int(days)
+}
+
+func tweet(client *twitter.Client, phrase string) {
+
+	daysUntilVacation := getDaysUntilVacation()
+	tweetText := ""
+
+	if daysUntilVacation == 0 {
+		tweetText = "Começooooooooooo\n Todo mundo livreeeee\n Boas férias galeraaaaaaa!"
+	} else if daysUntilVacation == 1 {
+		tweetText = "Só amanhã, só amanhã mesmo\n As férias da 08 começam amanhã!\n Parabéns aos sobreviventes ;)"
+	} else {
+		tweetText = fmt.Sprintf("%s\nFaltam só %d dias para as férias da 08!", phrase, daysUntilVacation)
+	}
+
+	tweet, _, err := client.Statuses.Update(tweetText, nil)
 	if err != nil {
 		log.Printf("Error tweeting!")
 		log.Fatal(err)
